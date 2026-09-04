@@ -17,22 +17,27 @@ to full.
 
 Show live download/upload speeds on the BUSY Bar with UP/DOWN label artwork.
 
-### [Ping Monitor](apps/ping-monitor/)
+### [Ping Monitor](apps/ping-monitor/) — Added in this fork
 
 Check a host's connectivity and latency every minute, with good, acceptable,
 bad, and offline status colors.
 
 ## Additions in this fork
 
-This fork includes the following custom host-side widgets:
+This fork adds the following custom host-side widget and configuration support:
 
-- **Network** — displays this computer's live download and upload speeds.
-- **Ping Monitor** — checks a configurable host every minute and displays its
-  latency with good, acceptable, bad, and offline colors.
-- **External configuration** — Ping Monitor can read the BUSY Bar IP address,
-  Wi-Fi password, ping target, interval, and timeout from an optional local
-  `apps/ping-monitor/.env` file. If no `.env` file exists, it defaults to the
-  USB address `10.0.4.20` with no password.
+- **Ping Monitor — Added in this fork** — checks a configurable host every
+  minute and displays its latency with good, acceptable, bad, and offline
+  colors.
+- **Wi-Fi configuration** — Social Battery, Network, and Ping Monitor can read
+  the BUSY Bar IP address and Wi-Fi HTTP access password from an optional local
+  `.env` file in each app folder. Ping Monitor also stores its ping target and
+  timing settings there; Network stores its interface and display settings.
+  If no `.env` file exists, every app defaults to the USB address `10.0.4.20`
+  with no password.
+
+Copy an app's `.env.example` to `.env`, edit the values, and start the app with
+its launcher. The `.env` files are ignored by Git so passwords stay local.
 
 See [apps/ping-monitor/README.md](apps/ping-monitor/README.md) for setup and
 usage instructions.
