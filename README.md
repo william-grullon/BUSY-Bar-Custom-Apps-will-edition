@@ -29,6 +29,9 @@ This fork adds the following custom host-side widget and configuration support:
 - **Ping Monitor — Added in this fork** — checks a configurable host every
   minute and displays its latency with good, acceptable, bad, and offline
   colors.
+- After its first successful display update, Ping Monitor confirms in the
+  terminal that it is working. If the display is busy, it explains how to stop
+  the other app and retries every 10 seconds.
 - **Wi-Fi configuration** — Social Battery, Network, and Ping Monitor can read
   the BUSY Bar IP address and Wi-Fi HTTP access password from an optional local
   `.env` file in each app folder. Ping Monitor also stores its ping target and

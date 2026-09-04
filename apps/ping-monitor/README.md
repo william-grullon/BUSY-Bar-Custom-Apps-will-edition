@@ -114,6 +114,16 @@ python3 ping_monitor.py --host 192.168.1.123 --target 192.168.1.1 --interval 60
 The app uses the computer's system `ping` command and does not require an API
 key for the ping target.
 
+After the first successful display update, the terminal shows:
+
+```text
+Ping Monitor is working; the result is on the BUSY Bar.
+```
+
+This confirmation appears once per run. If another app owns the display, the
+terminal explains how to stop it and retries the display update every 10
+seconds.
+
 ## How it works
 
 The app sends one ping from the computer running the app. It does not measure
