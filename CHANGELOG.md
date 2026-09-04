@@ -2,6 +2,12 @@
 
 ## 2026-09-04
 
+- Added `apps/screen-saver/`, a customizable screen saver cycling through static
+  and animated pixel art scenes on the front 72×16 RGB LED matrix with dial
+  navigation, OK button pause/freeze, and smart image fitting.
+- Added `apps/screen-saver/generate_scenes.py`, a scene generator and image/GIF
+  converter with 12 procedural pixel-art presets, multi-frame animation support,
+  Floyd-Steinberg dithering, and Windows/macOS double-click launchers.
 - Added `apps/ping-monitor/`, a configurable connectivity and latency monitor
   with five-minute checks and Windows/macOS launchers.
 

@@ -155,7 +155,7 @@ after the app stops. The app clears its content from the BUSY Bar when it stops.
 
 ### The app says the display is busy
 
-Stop Social Battery or any other BUSY Bar app that is still running with
+Stop Social Battery, Screen Saver, or any other BUSY Bar app that is still running with
 `Ctrl+C`, **Back**, or the BUSY Bar mode switch. Also stop any active BUSY
 session if one is using the display. Ping Monitor will retry the same result
 every 10 seconds until the display becomes available.

@@ -22,28 +22,42 @@ Show live download/upload speeds on the BUSY Bar with UP/DOWN label artwork.
 Check a host's connectivity and latency every minute, with good, acceptable,
 bad, and offline status colors.
 
+### [Screen Saver](apps/screen-saver/) — Added in this fork
+
+Cycles through animated and static pixel art scenes on your BUSY Bar front
+display with rotary dial navigation, button pause/freeze, smart image fitting,
+and an included Scene Generator tool to create custom presets or convert photos.
+
 ## Additions in this fork
 
 This fork adds the following custom host-side widget and configuration support:
 
+- **Screen Saver & Scene Generator — Added in this fork** — cycles through
+  scenes on a configurable interval or via dial turns, with support for animated
+  frames and GIFs, pause/freeze on OK button, and an interactive procedural
+  pixel art generator and image converter. Generated and custom scenes are
+  kept strictly local via `.gitignore`, and default starter scenes are
+  automatically generated on first run.
 - **Ping Monitor — Added in this fork** — checks a configurable host every
   minute and displays its latency with good, acceptable, bad, and offline
   colors.
 - After its first successful display update, Ping Monitor confirms in the
   terminal that it is working. If the display is busy, it explains how to stop
   the other app and retries every 10 seconds.
-- **Wi-Fi configuration** — Social Battery, Network, and Ping Monitor can read
-  the BUSY Bar IP address and Wi-Fi HTTP access password from an optional local
-  `.env` file in each app folder. Ping Monitor also stores its ping target and
-  timing settings there; Network stores its interface and display settings.
+- **Wi-Fi configuration** — Social Battery, Network, Ping Monitor, and Screen
+  Saver can read the BUSY Bar IP address and Wi-Fi HTTP access password from an
+  optional local `.env` file in each app folder. Ping Monitor also stores its ping
+  target and timing settings there; Network stores its interface and display
+  settings; Screen Saver stores its interval and playback settings.
   If no `.env` file exists, every app defaults to the USB address `10.0.4.20`
   with no password.
 
 Copy an app's `.env.example` to `.env`, edit the values, and start the app with
 its launcher. The `.env` files are ignored by Git so passwords stay local.
 
-See [apps/ping-monitor/README.md](apps/ping-monitor/README.md) for setup and
-usage instructions.
+See [apps/screen-saver/README.md](apps/screen-saver/README.md) and
+[apps/ping-monitor/README.md](apps/ping-monitor/README.md) for setup and usage
+instructions.
 
 ## AI lessons and skills
 
