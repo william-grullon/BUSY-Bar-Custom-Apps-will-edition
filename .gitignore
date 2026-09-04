@@ -10,7 +10,3 @@ venv/
 
 # Local-only until ready for public release
 apps/spotify/
-
-# Generated Screen Saver scenes
-apps/screen-saver/scenes/
-

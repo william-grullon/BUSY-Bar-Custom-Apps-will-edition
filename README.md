@@ -34,10 +34,10 @@ This fork adds the following custom host-side widget and configuration support:
 
 - **Screen Saver & Scene Generator — Added in this fork** — cycles through
   scenes on a configurable interval or via dial turns, with support for animated
-  frames and GIFs, pause/freeze on OK button, and an interactive procedural
-  pixel art generator and image converter. Generated and custom scenes are
-  kept strictly local via `.gitignore`, and default starter scenes are
-  automatically generated on first run.
+  frames and GIFs, loop-locking on the OK button, and an interactive procedural
+  pixel art generator and image converter. Comes pre-packaged with 9 default
+  animated scenes (aquarium, aurora, cyberpunk city, fireplace, lava lamp, matrix,
+  pacman, rainbow wave, synthwave) that users can keep, delete, or customize.
 - **Ping Monitor — Added in this fork** — checks a configurable host every
   minute and displays its latency with good, acceptable, bad, and offline
   colors.

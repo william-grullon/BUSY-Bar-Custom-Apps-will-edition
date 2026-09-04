@@ -417,9 +417,13 @@ class ScreenSaver:
             print(f"No scenes found in '{self.scenes_dir.name}'. Generating default starter scenes…")
             self.scenes_dir.mkdir(parents=True, exist_ok=True)
             try:
-                from generate_scenes import PRESETS, generate_preset
-                for name in PRESETS:
-                    generate_preset(name, self.scenes_dir, animated=False)
+                from generate_scenes import generate_preset
+                default_presets = [
+                    "aquarium", "aurora", "cyberpunk_city", "fireplace",
+                    "lava_lamp", "matrix", "pacman", "rainbow_wave", "synthwave"
+                ]
+                for name in default_presets:
+                    generate_preset(name, self.scenes_dir, animated=True, frames=16)
                 self.scenes = load_scenes(self.scenes_dir)
             except Exception as err:
                 raise ValueError(

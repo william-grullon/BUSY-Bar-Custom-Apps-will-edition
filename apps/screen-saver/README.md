@@ -75,24 +75,111 @@ SCREENSAVER_FPS=4
 
 Command-line flags override `.env` settings.
 
-## Adding your own scenes
+## Default scenes included
 
-You can easily add your own scenes to the `scenes/` folder:
+The app comes pre-packaged with 9 ready-to-enjoy animated pixel art scenes in the `scenes/` folder:
 
-1. **Single images**: Drop any `.png`, `.jpg`, `.jpeg`, or `.webp` file directly
-   into `scenes/`. The app will automatically center-crop and resize it to 72×16.
-2. **Animated scenes**: Drop an animated `.gif` file into `scenes/`, or create a
-   subfolder (e.g. `scenes/my_animation/`) containing ordered frames (`000.png`,
-   `001.png`, `002.png`...).
+- **aquarium** — Swimming tropical clownfish and ascending bubbles
+- **aurora** — Shimmering northern lights over snowy pine mountains
+- **cyberpunk_city** — Night skyline with lit windows, blinking beacons, and moon
+- **fireplace** — Cozy campfire with dancing embers and flickering flames
+- **lava_lamp** — Flowing retro metaball liquid blobs
+- **matrix** — Cascading green digital rain code
+- **pacman** — Classic arcade scene with Pac-Man eating dots chased by ghosts
+- **rainbow_wave** — Demoscene plasma wave cycling vibrant RGB hues
+- **synthwave** — 80s outrun horizon with neon sunset and perspective grid
 
-The screen saver automatically discovers new scenes next time it loads!
+*(Additional optional presets like `starfield`, `game_of_life`, and `sunset_beach` can be generated anytime with the Scene Generator tool.)*
 
-> [!NOTE]
-> **Git & Privacy**: The `scenes/` directory is excluded by `.gitignore` so your
-> personal photos, custom art, and generated scenes stay strictly local and are
-> never committed to Git. If you clone the repository fresh with an empty
-> `scenes/` folder, Screen Saver will automatically generate the 12 default
-> starter scenes for you on its first run.
+## How to delete scenes you don't like
+
+You can freely remove any scenes you don't want to see:
+
+1. **Using File Explorer (Windows) or Finder (macOS)**:
+   - Open the `apps/screen-saver/scenes/` folder.
+   - Select the folder or image file for any scene you don't want (e.g. `pacman/` or `lava_lamp/`).
+   - Press **Delete** or move it to the Recycle Bin / Trash.
+2. **Using the terminal**:
+   - On Windows (PowerShell):
+     ```powershell
+     Remove-Item -Recurse -Force "apps/screen-saver/scenes/pacman"
+     ```
+   - On macOS / Linux:
+     ```bash
+     rm -rf apps/screen-saver/scenes/pacman
+     ```
+
+Next time the Screen Saver starts or cycles, the deleted scenes will simply be skipped.
+
+## Adding your own custom scenes
+
+You can easily add new scenes to the screen saver using any of the following methods.
+
+### Method 1: Drop files directly into `scenes/` (Simplest)
+
+Simply drag and drop your files into the `apps/screen-saver/scenes/` folder:
+
+- **Static Images** (`.png`, `.jpg`, `.jpeg`, `.webp`, `.bmp`):
+  - Drop any picture directly into `scenes/`.
+  - The app will automatically detect it, center-crop and resize it to 72×16, and optimize contrast for the LED matrix.
+  - *Example*: Drop in `my_wallpaper.jpg` -> appears as a scene automatically.
+- **Animated GIFs** (`.gif`):
+  - Drop any animated GIF directly into `scenes/`.
+  - The app will automatically unpack the frames, resize them to 72×16, and loop them smoothly during playback.
+  - *Example*: Drop in `dancing_cat.gif` -> loops smoothly as an animated scene.
+- **Multi-Frame Folders** (Custom frame sequence):
+  - Create a new folder inside `scenes/`, for example `scenes/cool_animation/`.
+  - Put numbered PNG frames inside it: `000.png`, `001.png`, `002.png`, etc.
+  - The app will play all frames in order as a looping animation.
+
+> [!TIP]
+> **Dynamic Discovery**: If you drop a new picture or folder into `scenes/` while the screen saver is already running, it automatically detects and adds it to the rotation on the next cycle—no need to restart the app!
+
+### Method 2: Convert images with the Scene Generator
+
+If you want fine-grained control over how an image is cropped, enhanced, or dithered before adding it to your screen saver:
+
+1. **Using the double-click launcher**:
+   - Open `Start Here/` and run `Windows - Double-click to Generate Scenes.bat` (or `macOS - Double-click to Generate Scenes.command`).
+   - Select **4. Convert an Image or GIF File** and type/paste the path to your file.
+2. **Using the command line**:
+   - Standard conversion (smart crop & LED contrast boost):
+     ```bash
+     python generate_scenes.py --convert "C:\path\to\my_photo.jpg"
+     ```
+   - Convert with retro Floyd-Steinberg dithering:
+     ```bash
+     python generate_scenes.py --convert "C:\path\to\my_photo.jpg" --dither
+     ```
+   - Fit entire image with black letterbox borders instead of cropping:
+     ```bash
+     python generate_scenes.py --convert "C:\path\to\logo.png" --mode fit
+     ```
+   - Convert an entire folder of photos at once:
+     ```bash
+     python generate_scenes.py --convert-folder "C:\Users\username\Pictures\Screensaver"
+     ```
+
+### Method 3: Generate the optional extra presets
+
+If you'd like to try the presets that were excluded from the default set (`starfield`, `game_of_life`, `sunset_beach`):
+
+```bash
+# Generate as smooth 16-frame animations:
+python generate_scenes.py --preset starfield --animated
+python generate_scenes.py --preset game_of_life --animated
+python generate_scenes.py --preset sunset_beach --animated
+
+# Or generate as single static images:
+python generate_scenes.py --preset starfield
+```
+
+### Design tips for 72×16 LED displays
+
+- **Native Resolution**: The front display is exactly **72 pixels wide by 16 pixels high** (aspect ratio 4.5 : 1). Very wide panoramic images crop best.
+- **Contrast & Brightness**: RGB LEDs look best with high contrast and dark/black backgrounds. High-contrast pixel art, neon colors, and glowing outlines look stunning.
+- **Pixel Art Assets**: If you download pixel art from sites like [Lospec](https://lospec.com/) or [OpenGameArt](https://opengameart.org/), 16px-tall sprite sheets and panoramas look exceptionally crisp on the BUSY Bar.
+
 
 ## Scene Generator tool (`generate_scenes.py`)
 
