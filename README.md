@@ -19,8 +19,23 @@ Show live download/upload speeds on the BUSY Bar with UP/DOWN label artwork.
 
 ### [Ping Monitor](apps/ping-monitor/)
 
-Check a host's connectivity and latency every five minutes, with green,
-yellow, orange, and offline status colors.
+Check a host's connectivity and latency every minute, with good, acceptable,
+bad, and offline status colors.
+
+## Additions in this fork
+
+This fork includes the following custom host-side widgets:
+
+- **Network** — displays this computer's live download and upload speeds.
+- **Ping Monitor** — checks a configurable host every minute and displays its
+  latency with good, acceptable, bad, and offline colors.
+- **External configuration** — Ping Monitor can read the BUSY Bar IP address,
+  Wi-Fi password, ping target, interval, and timeout from an optional local
+  `apps/ping-monitor/.env` file. If no `.env` file exists, it defaults to the
+  USB address `10.0.4.20` with no password.
+
+See [apps/ping-monitor/README.md](apps/ping-monitor/README.md) for setup and
+usage instructions.
 
 ## AI lessons and skills
 
