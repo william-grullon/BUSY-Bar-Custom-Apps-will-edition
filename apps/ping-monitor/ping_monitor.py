@@ -251,6 +251,7 @@ def main() -> None:
 
     try:
         next_check = time.monotonic()
+        display_confirmed = False
         while True:
             latency = ping(args.target, args.timeout)
             if latency is None:
@@ -260,11 +261,30 @@ def main() -> None:
                 rounded_latency = round(latency)
                 label, value = "PING", f"{rounded_latency}ms"
                 print(f"{args.target}: {rounded_latency} ms")
-            try:
-                bar.draw(label, value, color_for_latency(latency))
-            except requests.RequestException as error:
-                print(f"Display update failed: {error}")
-                break
+            while True:
+                try:
+                    bar.draw(label, value, color_for_latency(latency))
+                    if not display_confirmed:
+                        print("Ping Monitor is working; the result is on the BUSY Bar.")
+                        display_confirmed = True
+                    break
+                except requests.HTTPError as error:
+                    if (
+                        error.response is not None
+                        and error.response.status_code == 409
+                    ):
+                        print(
+                            "BUSY Bar display is busy. Stop the other app "
+                            "with Ctrl+C, Back, or the mode switch; retrying "
+                            "in 10 seconds."
+                        )
+                        time.sleep(10)
+                    else:
+                        print(f"Display update failed: {error}")
+                        return
+                except requests.RequestException as error:
+                    print(f"Display update failed: {error}")
+                    return
 
             next_check += args.interval
             wait_for = max(0, next_check - time.monotonic())

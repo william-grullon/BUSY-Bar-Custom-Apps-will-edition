@@ -143,6 +143,13 @@ after the app stops. The app clears its content from the BUSY Bar when it stops.
 - Try your router address to separate local-network problems from internet
   connectivity problems.
 
+### The app says the display is busy
+
+Stop Social Battery or any other BUSY Bar app that is still running with
+`Ctrl+C`, **Back**, or the BUSY Bar mode switch. Also stop any active BUSY
+session if one is using the display. Ping Monitor will retry the same result
+every 10 seconds until the display becomes available.
+
 ### The Wi-Fi password is rejected
 
 Use the BUSY Bar's local HTTP API access password. It is different from a BUSY
