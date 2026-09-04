@@ -17,6 +17,11 @@ to full.
 
 Show live download/upload speeds on the BUSY Bar with UP/DOWN label artwork.
 
+### [Ping Monitor](apps/ping-monitor/)
+
+Check a host's connectivity and latency every five minutes, with green,
+yellow, orange, and offline status colors.
+
 ## AI lessons and skills
 
 Plain Markdown for any AI assistant:

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-04
+
+- Added `apps/ping-monitor/`, a configurable connectivity and latency monitor
+  with five-minute checks and Windows/macOS launchers.
+
 ## 2026-08-10
 
 - Social Battery can start in Off mode, and closes only when the physical mode
