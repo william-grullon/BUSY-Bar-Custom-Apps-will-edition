@@ -28,6 +28,21 @@ LABELS_PNG = APP_DIR / "Speed_down-up.png"
 DEVICE_LABEL_NAME = "speed_labels.png"
 
 
+def load_dotenv() -> None:
+    """Load simple KEY=VALUE settings without requiring another dependency."""
+    config_path = APP_DIR / ".env"
+    if not config_path.is_file():
+        return
+    for raw_line in config_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key, value = key.strip(), value.strip().strip("'\"")
+        if key:
+            os.environ.setdefault(key, value)
+
+
 class BusyBarClient:
     def __init__(self, host: str, password: str | None = None) -> None:
         clean_host = (
@@ -220,6 +235,7 @@ def prepare_access(bar: BusyBarClient) -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    load_dotenv()
     parser = argparse.ArgumentParser(
         description="Show live network speeds on a BUSY Bar with UP/DOWN labels."
     )
@@ -245,19 +261,19 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--interface",
-        default="auto",
+        default=os.environ.get("NETWORK_INTERFACE", "auto"),
         help="Network interface to monitor (default: auto)",
     )
     parser.add_argument(
         "--refresh-interval",
         type=float,
-        default=DEFAULT_REFRESH,
+        default=float(os.environ.get("NETWORK_REFRESH_INTERVAL", DEFAULT_REFRESH)),
         help=f"Seconds between display updates (default: {DEFAULT_REFRESH})",
     )
     parser.add_argument(
         "--display-timeout",
         type=int,
-        default=1,
+        default=int(os.environ.get("NETWORK_DISPLAY_TIMEOUT", 1)),
         help="How long speed text stays on screen before refresh (default: 1)",
     )
     return parser.parse_args()

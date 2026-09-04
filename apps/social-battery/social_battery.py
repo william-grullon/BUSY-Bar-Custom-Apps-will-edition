@@ -37,6 +37,21 @@ STATES = [
 ]
 
 
+def load_dotenv() -> None:
+    """Load simple KEY=VALUE settings without requiring another dependency."""
+    config_path = APP_DIR / ".env"
+    if not config_path.is_file():
+        return
+    for raw_line in config_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key, value = key.strip(), value.strip().strip("'\"")
+        if key:
+            os.environ.setdefault(key, value)
+
+
 class BusyBarClient:
     def __init__(
         self,
@@ -413,6 +428,7 @@ class SocialBattery:
 
 
 def parse_args() -> argparse.Namespace:
+    load_dotenv()
     parser = argparse.ArgumentParser(
         description="Run Social Battery on a release-firmware BUSY Bar."
     )

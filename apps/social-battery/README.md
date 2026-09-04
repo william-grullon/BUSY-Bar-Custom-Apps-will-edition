@@ -39,6 +39,17 @@ Bar. The password is sent directly to the BUSY Bar over the local Wi-Fi
 connection and is not saved by Social Battery. Only use a trusted Wi-Fi
 network.
 
+For a permanent Wi-Fi setup, copy `.env.example` to `.env` in this folder and
+edit it:
+
+```text
+BUSYBAR_IP=192.168.1.123
+BUSYBAR_PASSWORD=your-wifi-http-password
+```
+
+The `.env` file is ignored by Git. If it is absent, Social Battery defaults to
+USB at `10.0.4.20` with no password.
+
 ## 3. Start Social Battery
 
 Open the **Start Here** folder, then choose your computer:
@@ -48,14 +59,14 @@ Open the **Start Here** folder, then choose your computer:
 Double-click **macOS - Double-click to Start.command**.
 
 The first time, macOS may require you to right-click the file and select
-**Open**. Enter the BUSY Bar IP address when asked, or press Return to use the
-USB default.
+**Open**. The launcher uses `.env` when present, or the USB default when it is
+absent.
 
 ### Windows
 
 Double-click **Windows - Double-click to Start.bat**.
 
-Enter the BUSY Bar IP address when asked, or press Enter to use the USB default.
+The launcher uses `.env` when present, or the USB default when it is absent.
 
 ### Linux or manual start
 

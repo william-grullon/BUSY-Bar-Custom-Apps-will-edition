@@ -27,15 +27,10 @@ source .venv/bin/activate
 python -m pip install --quiet --disable-pip-version-check -r requirements.txt || exit 1
 
 echo
-read "host?BUSY Bar IP [10.0.4.20 for USB]: "
-
-args=()
-if [[ -n "$host" ]]; then
-  args+=(--host "$host")
-fi
-
 echo
-python social_battery.py "${args[@]}"
+echo "Using settings from .env when present, otherwise USB defaults."
+echo
+python social_battery.py
 status=$?
 
 echo

@@ -32,14 +32,10 @@ python -m pip install --quiet --disable-pip-version-check -r requirements.txt
 if errorlevel 1 goto :error
 
 echo.
-set /p BUSY_HOST=BUSY Bar IP [10.0.4.20 for USB]: 
+echo Using settings from .env when present, otherwise USB defaults.
 echo.
 
-if "%BUSY_HOST%"=="" (
-  python social_battery.py
-) else (
-  python social_battery.py --host "%BUSY_HOST%"
-)
+python social_battery.py
 
 if errorlevel 1 goto :error
 echo.
