@@ -26,6 +26,8 @@ Open the `Start Here` folder and double-click the launcher for your computer:
 - Windows: `Windows - Double-click to Start.bat`
 - macOS: `macOS - Double-click to Start.command`
 
+You can also launch Ping Monitor directly from the repository root launcher (`Start.bat` or `python launcher.py`).
+
 The launcher creates a private Python environment and installs the required
 package the first time it runs. Enter the BUSY Bar IP address when prompted, or
 press Enter to use the USB default. Enter the host you want to monitor, or

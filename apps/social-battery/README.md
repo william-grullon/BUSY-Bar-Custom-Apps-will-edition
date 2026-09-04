@@ -52,7 +52,7 @@ USB at `10.0.4.20` with no password.
 
 ## 3. Start Social Battery
 
-Open the **Start Here** folder, then choose your computer:
+You can launch Social Battery from the repository root using `Start.bat` (or `python launcher.py`), or open the **Start Here** folder in this directory and choose your computer:
 
 ### macOS
 

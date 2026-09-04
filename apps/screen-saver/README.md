@@ -18,6 +18,13 @@ convert your own photos and GIFs.
   display.
 - **Animated scenes support**: Plays animated frame folders or looping GIFs at a
   smooth frame rate.
+- **Interactive terminal menu**: Pick individual scenes to loop indefinitely,
+  select custom subsets of scenes to rotate, or adjust playback settings (interval,
+  shuffle, FPS) directly in the terminal before starting.
+- **Live keyboard controls**: Control the screen saver live from your keyboard
+  (Arrow keys: `[Up/Down Arrows]` adjust FPS from 1 to 16, `[Right/Left Arrows]` navigate scenes;
+  `[Space]` lock/unlock loop, `[M]`/`[Esc]` return to menu, `[A]` all scenes, `[1-9]` jump, `[S]` toggle shuffle, `[Q]` quit)
+  in addition to physical dial and button controls.
 - **Scene Generator tool**: Create new procedural pixel art scenes (synthwave,
   matrix rain, cozy fireplace, aquarium, starfield, cyberpunk city, and more) or
   convert desktop images with contrast optimization and dithering.
@@ -41,16 +48,63 @@ Open the `Start Here` folder and double-click:
   - macOS: `macOS - Double-click to Generate Scenes.command`
 
 The launcher creates a private Python environment and installs required
-dependencies automatically the first time it runs.
+dependencies automatically the first time it runs. You can also launch Screen
+Saver or Scene Generator directly from the repository root using `Start.bat` (or
+`python launcher.py`).
 
-## Hardware controls on your BUSY Bar
+## Interactive terminal menu
 
-| Control | Action |
-|---------|--------|
-| **Turn Dial Clockwise** | Skip immediately to the next scene |
-| **Turn Dial Counter-Clockwise** | Go back to the previous scene |
-| **Press OK Button** | Lock on the current scene (animation loops continue playing indefinitely; press again to resume cycling) |
-| **Flip Mode Switch** | Exit the screen saver cleanly |
+When you start Screen Saver from the terminal or double-click the launcher, an interactive terminal menu lets you customize your session:
+
+```text
+==============================================================
+           BUSY Bar Screen Saver - Terminal Menu
+==============================================================
+ BUSY Bar:       192.168.9.185
+ Scenes Folder:  .../apps/screen-saver/scenes (9 scenes found)
+ Current Config: Interval: 10s | Shuffle: ON (Randomized) | FPS: 4
+--------------------------------------------------------------
+ Select an option:
+   1. Start Screen Saver (Cycle all scenes) [Default: Press Enter]
+   2. Pick a single scene to loop indefinitely
+   3. Select custom scenes to cycle
+   4. Change playback settings (Interval, Shuffle, FPS)
+   5. Launch Scene Generator (Create presets, convert images/GIFs)
+   0. Exit
+--------------------------------------------------------------
+Enter choice (0-5) [1]:
+```
+
+- **Press Enter** (Option 1): Immediately starts cycling through all scenes.
+- **Option 2**: View all available scenes and choose one to loop continuously.
+- **Option 3**: Pick a custom subset of scenes (e.g. `1, 3, 5` or `synthwave, matrix`) to rotate.
+- **Option 4**: Adjust interval duration, toggle shuffle on/off, or tweak animation FPS on the fly.
+- **Option 5**: Launches the interactive Scene Generator wizard directly.
+
+## Live terminal controls & hardware controls
+
+You can control playback directly from your computer keyboard or from the BUSY Bar hardware:
+
+| Action | Terminal Key | Hardware Control |
+|---|---|---|
+| **Speed Up FPS (+1)** | `[Up Arrow]` or `[+]` | — |
+| **Slow Down FPS (-1)** | `[Down Arrow]` or `[-]` | — |
+| **Keep Loop / Lock Scene** | `[Space]` or `[L]` | Press **OK** button |
+| **Next Scene / Browse Scenes** | `[Right Arrow]`, `[N]`, or `[Enter]` | Turn dial **Clockwise** |
+| **Previous Scene / Browse Scenes** | `[Left Arrow]` or `[P]` | Turn dial **Counter-Clockwise** |
+| **Return to Menu (Switch Modes)** | `[M]`, `[B]`, or `[Esc]` | Press **Back** button |
+| **Switch to All Scenes Rotation** | `[A]` or `[Space]` | Press **OK** button |
+| **Jump to Scene #** | `[1]` - `[9]` | — |
+| **Toggle Shuffle** | `[S]` | — |
+| **Clean Exit & Clear Display** | `[Q]` or `Ctrl+C` | Flip **Mode Switch** |
+
+> [!TIP]
+> **Arrow Key Controls:**
+> - **`[Up Arrow]` / `[Down Arrow]`**: Adjusts animation playback speed dynamically from **1 to 16 FPS** (default is **4 FPS**).
+> - **`[Right Arrow]` / `[Left Arrow]`**: Immediately skips forward or backward through scenes (or browses through available presets in single-scene mode).
+>
+> **Switching back from Single-Scene mode:**
+> If you select a single scene (Option 2), you can return to the main menu at any time by pressing **`[M]`** (or `[B]`, `[Esc]`, or the physical **Back** button on your BUSY Bar). You can also instantly resume full automatic rotation across all scenes by pressing **`[A]`** or **`[Space]`** (or the hardware **OK** button).
 
 ## Configuration (`.env`)
 
@@ -249,10 +303,18 @@ python generate_scenes.py --convert-folder "C:\Users\username\Pictures"
 ```bash
 # In the apps/screen-saver directory:
 python -m pip install -r requirements.txt
+
+# Start with interactive terminal menu:
 python screen_saver.py
 
-# Custom interval and Wi-Fi host:
-python screen_saver.py --host 192.168.1.50 --interval 15 --no-shuffle
+# List all available scenes:
+python screen_saver.py --list
+
+# Play and loop a single scene indefinitely:
+python screen_saver.py --scene synthwave
+
+# Non-interactive start (skip menu) with custom interval:
+python screen_saver.py --non-interactive --interval 15 --no-shuffle
 ```
 
 ## Stopping the app

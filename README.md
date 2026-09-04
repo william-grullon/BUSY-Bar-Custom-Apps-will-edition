@@ -6,6 +6,15 @@ firmware.
 Each app has its own folder with everything needed to install and run it. No
 custom or modified firmware is required.
 
+## Quick start
+
+Double-click the launcher in the root folder to open the interactive terminal launcher:
+
+- **Windows**: `Start.bat`
+- **macOS / Linux**: `Start.command` (or run `python launcher.py`)
+
+From here, you can select and launch any app directly from your terminal.
+
 ## Available apps
 
 ### [Social Battery](apps/social-battery/)
@@ -32,10 +41,15 @@ and an included Scene Generator tool to create custom presets or convert photos.
 
 This fork adds the following custom host-side widget and configuration support:
 
+- **Unified Terminal Launcher — Added in this fork** — run `Start.bat` (or `python launcher.py`)
+  at the repository root to pick and launch any app (Screen Saver, Scene Generator, Ping Monitor, Network,
+  or Social Battery) directly from an interactive terminal menu.
 - **Screen Saver & Scene Generator — Added in this fork** — cycles through
   scenes on a configurable interval or via dial turns, with support for animated
-  frames and GIFs, loop-locking on the OK button, and an interactive procedural
-  pixel art generator and image converter. Comes pre-packaged with 9 default
+  frames and GIFs, loop-locking on the OK button, an interactive terminal menu
+  (pick scenes, subsets, or settings), real-time terminal keyboard controls (Arrow keys: Up/Down arrows adjust FPS
+  from 1 to 16, Left/Right arrows navigate scenes; `[Space]` lock/unlock loop, `[M]` menu, `[A]` all scenes, `[1-9]`, `[Q]`),
+  and an interactive procedural pixel art generator and image converter. Comes pre-packaged with 9 default
   animated scenes (aquarium, aurora, cyberpunk city, fireplace, lava lamp, matrix,
   pacman, rainbow wave, synthwave) that users can keep, delete, or customize.
 - **Ping Monitor — Added in this fork** — checks a configurable host every

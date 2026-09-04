@@ -55,7 +55,7 @@ The `.env` file is ignored by Git. If it is absent, Network defaults to USB at
 
 ## 3. Start Network
 
-Open the **Start Here** folder, then choose your computer:
+You can launch Network from the repository root using `Start.bat` (or `python launcher.py`), or open the **Start Here** folder in this directory and choose your computer:
 
 ### macOS
 
