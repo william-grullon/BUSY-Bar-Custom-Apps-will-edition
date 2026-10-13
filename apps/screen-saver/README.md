@@ -108,20 +108,28 @@ You can control playback directly from your computer keyboard or from the BUSY B
 
 ## Configuration (`.env`)
 
-To customize settings permanently, copy `.env.example` to `.env` in this folder:
+The BUSY Bar connection is shared by every app. Copy `.env.example` to `.env`
+in the repository root (the folder with `Start.bat`):
 
 ```text
 BUSYBAR_IP=10.0.4.20
 BUSYBAR_PASSWORD=
+```
+
+- `BUSYBAR_IP`: Defaults to `10.0.4.20` for USB. For Wi-Fi, enter your bar's IP
+  address. If the bar cannot be reached, the app asks for a new IP and saves it
+  here for all apps.
+- `BUSYBAR_PASSWORD`: Set this if your BUSY Bar Wi-Fi HTTP API has password
+  protection enabled.
+
+Screen Saver's own settings go in `.env` in this folder (copy `.env.example`):
+
+```text
 SCREENSAVER_INTERVAL=10
 SCREENSAVER_SHUFFLE=true
 SCREENSAVER_FPS=4
 ```
 
-- `BUSYBAR_IP`: Defaults to `10.0.4.20` for USB. For Wi-Fi, enter your bar's IP
-  address.
-- `BUSYBAR_PASSWORD`: Set this if your BUSY Bar Wi-Fi HTTP API has password
-  protection enabled.
 - `SCREENSAVER_INTERVAL`: Number of seconds to show each scene (default: `10`).
 - `SCREENSAVER_SHUFFLE`: `true` for random shuffle, `false` for alphabetical
   folder order.
@@ -337,4 +345,4 @@ or Back on the other app to release the display.
 
 ### Wi-Fi password prompt
 If your BUSY Bar requires authentication, set `BUSYBAR_PASSWORD=your_password`
-in `.env` or enter it when prompted in the terminal.
+in the shared `.env` in the repository root or enter it when prompted in the terminal.

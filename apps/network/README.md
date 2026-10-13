@@ -39,18 +39,27 @@ USB normally uses `10.0.4.20`. For Wi-Fi, use the IP address shown by your BUSY
 Bar. The password is sent directly to the BUSY Bar over the local Wi-Fi
 connection and is not saved by Network. Only use a trusted Wi-Fi network.
 
-For a permanent Wi-Fi setup, copy `.env.example` to `.env` in this folder and
-edit it:
+For a permanent Wi-Fi setup, copy `.env.example` to `.env` in the repository
+root (the folder with `Start.bat`) and set the bar's address there. Every app
+reads this shared file:
 
 ```text
 BUSYBAR_IP=192.168.1.123
 BUSYBAR_PASSWORD=your-wifi-http-password
+```
+
+If an app cannot reach the bar, it asks for a new IP and saves it to this
+shared file, so the other apps pick it up too.
+
+Network's own settings go in `.env` in this folder (copy `.env.example`):
+
+```text
 NETWORK_INTERFACE=auto
 NETWORK_REFRESH_INTERVAL=0.25
 NETWORK_DISPLAY_TIMEOUT=1
 ```
 
-The `.env` file is ignored by Git. If it is absent, Network defaults to USB at
+The `.env` files are ignored by Git. If it is absent, Network defaults to USB at
 `10.0.4.20` with no password.
 
 ## 3. Start Network

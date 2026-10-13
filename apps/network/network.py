@@ -24,23 +24,29 @@ MEASURE_SECONDS = 0.1
 API_VERSION_HEADER = "X-Busy-Api-Version"
 DRAW_PRIORITY = 50
 APP_DIR = Path(__file__).resolve().parent
+SHARED_ENV = APP_DIR.parent.parent / ".env"
 LABELS_PNG = APP_DIR / "Speed_down-up.png"
 DEVICE_LABEL_NAME = "speed_labels.png"
 
 
 def load_dotenv() -> None:
-    """Load simple KEY=VALUE settings without requiring another dependency."""
-    config_path = APP_DIR / ".env"
-    if not config_path.is_file():
-        return
-    for raw_line in config_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
+    """Load simple KEY=VALUE settings from .env files without extra dependencies.
+
+    The shared .env in the repository root is read first, so its settings
+    (such as BUSYBAR_IP) apply to every app and win over this app's own .env.
+    """
+    for config_path in (SHARED_ENV, APP_DIR / ".env"):
+        if not config_path.is_file():
             continue
-        key, value = line.split("=", 1)
-        key, value = key.strip(), value.strip().strip("'\"")
-        if key:
-            os.environ.setdefault(key, value)
+        for raw_line in config_path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key, value = key.strip(), value.strip().strip("'\"")
+            # Blank values (like an empty BUSYBAR_PASSWORD) count as unset.
+            if key and value:
+                os.environ.setdefault(key, value)
 
 
 def ask_for_new_host(host: str, error: Exception) -> str | None:
@@ -62,8 +68,8 @@ def ask_for_new_host(host: str, error: Exception) -> str | None:
 
 
 def save_host(host: str) -> None:
-    """Store BUSYBAR_IP in .env so the new address is used next time."""
-    config_path = APP_DIR / ".env"
+    """Store BUSYBAR_IP in the shared .env so every app uses the new address."""
+    config_path = SHARED_ENV
     lines: list[str] = []
     if config_path.is_file():
         lines = config_path.read_text(encoding="utf-8").splitlines()

@@ -36,13 +36,23 @@ press Enter to use `1.1.1.1`.
 On macOS, you may need to right-click the launcher and choose **Open** the
 first time.
 
-For a permanent setup, copy `.env.example` to `.env` in this app folder and
-edit the values. The `.env` file is ignored by git, so your Wi-Fi password will
-not be committed:
+For a permanent Wi-Fi setup, copy `.env.example` to `.env` in the repository
+root (the folder with `Start.bat`) and set the bar's address there. Every app
+reads this shared file:
 
 ```text
 BUSYBAR_IP=192.168.1.123
 BUSYBAR_PASSWORD=your-wifi-http-password
+```
+
+If an app cannot reach the bar, it asks for a new IP and saves it to this
+shared file, so the other apps pick it up too.
+
+Ping Monitor's own settings go in `.env` in this app folder (copy
+`.env.example`). The `.env` files are ignored by git, so your Wi-Fi password
+will not be committed:
+
+```text
 PING_TARGET=192.168.1.1
 PING_INTERVAL=60
 PING_TIMEOUT=5

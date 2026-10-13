@@ -39,13 +39,17 @@ Bar. The password is sent directly to the BUSY Bar over the local Wi-Fi
 connection and is not saved by Social Battery. Only use a trusted Wi-Fi
 network.
 
-For a permanent Wi-Fi setup, copy `.env.example` to `.env` in this folder and
-edit it:
+For a permanent Wi-Fi setup, copy `.env.example` to `.env` in the repository
+root (the folder with `Start.bat`) and set the bar's address there. Every app
+reads this shared file:
 
 ```text
 BUSYBAR_IP=192.168.1.123
 BUSYBAR_PASSWORD=your-wifi-http-password
 ```
+
+If an app cannot reach the bar, it asks for a new IP and saves it to this
+shared file, so the other apps pick it up too.
 
 The `.env` file is ignored by Git. If it is absent, Social Battery defaults to
 USB at `10.0.4.20` with no password.

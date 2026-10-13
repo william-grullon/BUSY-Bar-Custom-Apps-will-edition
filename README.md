@@ -59,15 +59,20 @@ This fork adds the following custom host-side widget and configuration support:
   terminal that it is working. If the display is busy, it explains how to stop
   the other app and retries every 10 seconds.
 - **Wi-Fi configuration** — Social Battery, Network, Ping Monitor, and Screen
-  Saver can read the BUSY Bar IP address and Wi-Fi HTTP access password from an
-  optional local `.env` file in each app folder. Ping Monitor also stores its ping
-  target and timing settings there; Network stores its interface and display
-  settings; Screen Saver stores its interval and playback settings.
-  If no `.env` file exists, every app defaults to the USB address `10.0.4.20`
-  with no password.
+  Saver read the BUSY Bar IP address and Wi-Fi HTTP access password from a
+  shared `.env` file in the repository root, so you set them once for every app.
+  App-specific settings go in an optional `.env` file in each app folder: Ping
+  Monitor stores its ping target and timing settings there; Network stores its
+  interface and display settings; Screen Saver stores its interval and playback
+  settings. If no `.env` file exists, every app defaults to the USB address
+  `10.0.4.20` with no password.
+- **New IP prompt** — if an app cannot reach the BUSY Bar (for example after it
+  joins a different Wi-Fi network), it asks for the new IP address, retries, and
+  saves the working address to the shared `.env` for all apps.
 
-Copy an app's `.env.example` to `.env`, edit the values, and start the app with
-its launcher. The `.env` files are ignored by Git so passwords stay local.
+Copy the root `.env.example` to `.env` for the shared settings, and an app's
+`.env.example` to `.env` in its folder for app-specific settings. The `.env`
+files are ignored by Git so passwords stay local.
 
 See [apps/screen-saver/README.md](apps/screen-saver/README.md) and
 [apps/ping-monitor/README.md](apps/ping-monitor/README.md) for setup and usage
