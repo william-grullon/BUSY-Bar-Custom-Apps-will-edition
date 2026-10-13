@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-13
+
+- Merged Ping Monitor into `apps/network/`: one screen now shows download and
+  upload speeds on the left and color-coded ping latency on the right. Ping
+  runs in the background (every 10 seconds by default) using the `PING_TARGET`,
+  `PING_INTERVAL`, and `PING_TIMEOUT` settings. Removed `apps/ping-monitor/`
+  and the UP/DOWN label artwork.
+
 ## 2026-09-04
 
 - Added `apps/screen-saver/`, a customizable screen saver cycling through static

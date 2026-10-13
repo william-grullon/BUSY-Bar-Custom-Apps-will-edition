@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Network for BUSY Bar release firmware.
 
-Uploads a static UP/DOWN label image, then shows this computer's live
-download/upload speeds next to it. Official release firmware only.
+Shows this computer's live download/upload speeds and the latency to a ping
+target on one screen. Official release firmware only.
 """
 
 from __future__ import annotations
@@ -10,7 +10,11 @@ from __future__ import annotations
 import argparse
 import getpass
 import os
+import platform
+import re
+import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -21,12 +25,19 @@ APP_NAME = "network"
 DEFAULT_HOST = "10.0.4.20"
 DEFAULT_REFRESH = 0.25
 MEASURE_SECONDS = 0.1
+DEFAULT_TARGET = "1.1.1.1"
+DEFAULT_PING_INTERVAL = 10.0
+DEFAULT_PING_TIMEOUT = 5.0
 API_VERSION_HEADER = "X-Busy-Api-Version"
 DRAW_PRIORITY = 50
+WHITE = "#FFFFFFFF"
+# The 72px front display splits 54px (75%) speeds / 18px (25%) ping.
+PING_CENTER_X = 63
+
+LATENCY_RE = re.compile(r"time[=<]\s*(\d+(?:\.\d+)?)\s*ms", re.IGNORECASE)
+
 APP_DIR = Path(__file__).resolve().parent
 SHARED_ENV = APP_DIR.parent.parent / ".env"
-LABELS_PNG = APP_DIR / "Speed_down-up.png"
-DEVICE_LABEL_NAME = "speed_labels.png"
 
 
 def load_dotenv() -> None:
@@ -129,73 +140,39 @@ class BusyBarClient:
         response.raise_for_status()
         return str(response.json().get("type") or "").lower()
 
-    def upload_asset(self, path: Path, remote_name: str) -> None:
-        response = self.session.post(
-            f"{self.api}/assets/upload",
-            params={
-                "application_name": APP_NAME,
-                "file": remote_name,
-            },
-            data=path.read_bytes(),
-            headers={"Content-Type": "application/octet-stream"},
-            timeout=15,
-        )
-        response.raise_for_status()
+    def draw(
+        self,
+        down_mbps: int,
+        up_mbps: int,
+        ping_value: str,
+        ping_color: str,
+        display_timeout: int,
+    ) -> None:
+        def text(element_id: str, value: str, x: int, y: int, align: str, color: str) -> dict:
+            return {
+                "id": element_id,
+                "type": "text",
+                "text": value,
+                "x": x,
+                "y": y,
+                "align": align,
+                "font": "small",
+                "color": color,
+                "display": "front",
+                "timeout": display_timeout,
+            }
 
-    def draw_labels(self, remote_name: str) -> None:
+        # Speeds fill the left 75% of the screen; ping is centered in the right 25%.
         response = self.session.post(
             f"{self.api}/display/draw",
             json={
                 "application_name": APP_NAME,
                 "priority": DRAW_PRIORITY,
                 "elements": [
-                    {
-                        "id": "labels_img",
-                        "type": "image",
-                        "path": remote_name,
-                        "x": 0,
-                        "y": 0,
-                        "display": "front",
-                        "opacity": 100,
-                        "timeout": 0,
-                    }
-                ],
-            },
-            timeout=5,
-        )
-        response.raise_for_status()
-
-    def draw_speeds(self, down_mbps: int, up_mbps: int, display_timeout: int) -> None:
-        response = self.session.post(
-            f"{self.api}/display/draw",
-            json={
-                "application_name": APP_NAME,
-                "priority": DRAW_PRIORITY,
-                "elements": [
-                    {
-                        "id": "down_speed",
-                        "type": "text",
-                        "text": f"{down_mbps} Mb/s",
-                        "x": 71,
-                        "y": -1,
-                        "align": "top_right",
-                        "font": "small",
-                        "color": "#FFFFFFFF",
-                        "display": "front",
-                        "timeout": display_timeout,
-                    },
-                    {
-                        "id": "up_speed",
-                        "type": "text",
-                        "text": f"{up_mbps} Mb/s",
-                        "x": 71,
-                        "y": 7,
-                        "align": "top_right",
-                        "font": "small",
-                        "color": "#FFFFFFFF",
-                        "display": "front",
-                        "timeout": display_timeout,
-                    },
+                    text("down_speed", f"D {down_mbps} Mb/s", 0, -1, "top_left", WHITE),
+                    text("up_speed", f"U {up_mbps} Mb/s", 0, 7, "top_left", WHITE),
+                    text("ping_label", "PING", PING_CENTER_X, -1, "top_mid", WHITE),
+                    text("ping_value", ping_value, PING_CENTER_X, 7, "top_mid", ping_color),
                 ],
             },
             timeout=5,
@@ -260,6 +237,73 @@ def measure_speeds(interface: str, interval: float) -> tuple[int, int]:
     return max(int(down_mbps), 0), max(int(up_mbps), 0)
 
 
+def ping(target: str, timeout: float) -> float | None:
+    """Return round-trip milliseconds, or None when the target is unreachable."""
+    timeout_ms = max(1, int(timeout * 1000))
+    if platform.system().lower() == "windows":
+        command = ["ping", "-n", "1", "-w", str(timeout_ms), target]
+    elif platform.system().lower() == "darwin":
+        command = ["ping", "-c", "1", "-W", str(timeout_ms), target]
+    else:
+        command = ["ping", "-c", "1", "-W", str(max(1, int(timeout))), target]
+
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=timeout + 2,
+            check=False,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
+
+    match = LATENCY_RE.search(result.stdout + result.stderr)
+    if result.returncode != 0 or not match:
+        return None
+    return float(match.group(1))
+
+
+def color_for_latency(latency: float | None) -> str:
+    if latency is None:
+        return "#FF4040FF"
+    if latency <= 50:
+        return "#40FF80FF"
+    if latency <= 100:
+        return "#FFFF40FF"
+    return "#FF4040FF"
+
+
+class PingWorker(threading.Thread):
+    """Pings the target in the background so speed updates never wait on it."""
+
+    def __init__(self, target: str, interval: float, timeout: float) -> None:
+        super().__init__(daemon=True)
+        self.target = target
+        self.interval = interval
+        self.timeout = timeout
+        self.checked = False
+        self.latency: float | None = None
+
+    def run(self) -> None:
+        next_check = time.monotonic()
+        while True:
+            self.latency = ping(self.target, self.timeout)
+            self.checked = True
+            next_check += self.interval
+            time.sleep(max(0, next_check - time.monotonic()))
+
+    def display(self) -> tuple[str, str, str]:
+        """Return (display text, color, terminal text) for the latest result."""
+        if not self.checked:
+            return "...", WHITE, "..."
+        latency = self.latency
+        if latency is None:
+            return "OFF", color_for_latency(None), "offline"
+        # Milliseconds without the unit, so it fits the narrow ping column.
+        return str(round(latency)), color_for_latency(latency), f"{round(latency)} ms"
+
+
 def prepare_access(bar: BusyBarClient) -> None:
     if bar.transport_type() != "wifi":
         return
@@ -285,7 +329,7 @@ def prepare_access(bar: BusyBarClient) -> None:
 def parse_args() -> argparse.Namespace:
     load_dotenv()
     parser = argparse.ArgumentParser(
-        description="Show live network speeds on a BUSY Bar with UP/DOWN labels."
+        description="Show live network speeds and ping latency on a BUSY Bar."
     )
     parser.add_argument(
         "--host",
@@ -322,7 +366,24 @@ def parse_args() -> argparse.Namespace:
         "--display-timeout",
         type=int,
         default=int(os.environ.get("NETWORK_DISPLAY_TIMEOUT", 1)),
-        help="How long speed text stays on screen before refresh (default: 1)",
+        help="How long text stays on screen before refresh (default: 1)",
+    )
+    parser.add_argument(
+        "--target",
+        default=os.environ.get("PING_TARGET", DEFAULT_TARGET),
+        help=f"Host or IP address to ping (default: {DEFAULT_TARGET})",
+    )
+    parser.add_argument(
+        "--ping-interval",
+        type=float,
+        default=float(os.environ.get("PING_INTERVAL", DEFAULT_PING_INTERVAL)),
+        help=f"Seconds between pings (default: {DEFAULT_PING_INTERVAL:g})",
+    )
+    parser.add_argument(
+        "--ping-timeout",
+        type=float,
+        default=float(os.environ.get("PING_TIMEOUT", DEFAULT_PING_TIMEOUT)),
+        help=f"Seconds to wait for each ping (default: {DEFAULT_PING_TIMEOUT:g})",
     )
     return parser.parse_args()
 
@@ -331,8 +392,8 @@ def main() -> None:
     args = parse_args()
     if args.refresh_interval <= 0:
         raise SystemExit("--refresh-interval must be greater than 0")
-    if not LABELS_PNG.is_file():
-        raise SystemExit(f"Label image not found: {LABELS_PNG}")
+    if args.ping_interval <= 0 or args.ping_timeout <= 0:
+        raise SystemExit("--ping-interval and --ping-timeout must be greater than 0")
 
     interface = pick_interface(args.interface)
 
@@ -342,9 +403,6 @@ def main() -> None:
         try:
             version = bar.connect()
             prepare_access(bar)
-            print("Uploading label artwork…")
-            bar.upload_asset(LABELS_PNG, DEVICE_LABEL_NAME)
-            bar.draw_labels(DEVICE_LABEL_NAME)
             break
         except PermissionError as error:
             raise SystemExit(str(error)) from error
@@ -366,27 +424,42 @@ def main() -> None:
         save_host(host)
     print(f"Connected to BUSY Bar at {bar.host} (API {version})")
     print(f"Monitoring interface '{interface}'.")
+    print(f"Pinging {args.target} every {args.ping_interval:g} seconds.")
     print("Press Ctrl+C to stop.")
 
+    pinger = PingWorker(args.target, args.ping_interval, args.ping_timeout)
+    pinger.start()
+
     try:
+        display_confirmed = False
         while True:
             down_mbps, up_mbps = measure_speeds(interface, MEASURE_SECONDS)
+            ping_value, ping_color, ping_text = pinger.display()
             print(
-                f"DOWN {down_mbps} Mb/s  |  UP {up_mbps} Mb/s    ",
+                f"DOWN {down_mbps} Mb/s  |  UP {up_mbps} Mb/s  |  PING {ping_text}    ",
                 end="\r",
                 flush=True,
             )
             try:
-                bar.draw_speeds(down_mbps, up_mbps, args.display_timeout)
+                bar.draw(down_mbps, up_mbps, ping_value, ping_color, args.display_timeout)
+                if not display_confirmed:
+                    print("\nNetwork is working; the result is on the BUSY Bar.")
+                    display_confirmed = True
             except requests.HTTPError as error:
-                if error.response is not None and error.response.status_code in (
-                    401,
-                    403,
-                ):
+                status = error.response.status_code if error.response is not None else None
+                if status in (401, 403):
                     raise SystemExit(
                         "The BUSY Bar rejected the Wi-Fi access password. "
                         "Check the HTTP API settings and try again."
                     ) from error
+                if status == 409:
+                    print(
+                        "\nBUSY Bar display is busy. Stop the other app "
+                        "with Ctrl+C, Back, or the mode switch; retrying "
+                        "in 10 seconds."
+                    )
+                    time.sleep(10)
+                    continue
                 print(f"\nDisplay update failed: {error}")
                 break
             except requests.RequestException as error:

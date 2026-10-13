@@ -30,14 +30,8 @@ APPS = [
         "cwd": APPS_DIR / "screen-saver",
     },
     {
-        "name": "Ping Monitor",
-        "description": "Monitor network host latency with color status on the display",
-        "script": APPS_DIR / "ping-monitor" / "ping_monitor.py",
-        "cwd": APPS_DIR / "ping-monitor",
-    },
-    {
-        "name": "Network Speed Monitor",
-        "description": "Show real-time download and upload bandwidth speeds",
+        "name": "Network Monitor",
+        "description": "Show live download/upload speeds and ping latency",
         "script": APPS_DIR / "network" / "network.py",
         "cwd": APPS_DIR / "network",
     },

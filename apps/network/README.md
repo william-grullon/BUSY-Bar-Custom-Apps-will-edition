@@ -1,13 +1,15 @@
 # Network
 
-Network shows this computer’s live **download** and **upload** speeds on the
-BUSY Bar, next to UP/DOWN label artwork.
+Network shows this computer’s live **download** and **upload** speeds and the
+**ping latency** to a host, all on one BUSY Bar screen. (This app now includes
+what used to be the separate Ping Monitor app.)
 
 The app runs on your computer and talks to a BUSY Bar using its official
 release-firmware API. No modified firmware is needed.
 
 **Note:** This measures traffic on a network interface on your computer (what
 is moving right now). It is not a separate “speed test to a distant server.”
+The ping is sent from your computer using its system `ping` command.
 
 ## What you need
 
@@ -57,7 +59,16 @@ Network's own settings go in `.env` in this folder (copy `.env.example`):
 NETWORK_INTERFACE=auto
 NETWORK_REFRESH_INTERVAL=0.25
 NETWORK_DISPLAY_TIMEOUT=1
+PING_TARGET=1.1.1.1
+PING_INTERVAL=10
+PING_TIMEOUT=5
 ```
+
+`PING_TARGET` is the host to ping. The default `1.1.1.1` checks general
+internet reachability; a router address such as `192.168.1.1` checks your local
+network instead. `PING_INTERVAL` is the number of seconds between pings, and
+`PING_TIMEOUT` is how long to wait for each reply. Command-line options take
+precedence over environment variables, which take precedence over `.env`.
 
 The `.env` files are ignored by Git. If it is absent, Network defaults to USB at
 `10.0.4.20` with no password.
@@ -109,12 +120,37 @@ To pick a specific network interface instead of auto:
 python3 network.py --interface en0
 ```
 
+To ping your router every 30 seconds instead of `1.1.1.1` every 10:
+
+```bash
+python3 network.py --target 192.168.1.1 --ping-interval 30
+```
+
 ## What you will see
 
-- Left: UP/DOWN label artwork
-- Right: live speeds, for example `48 Mb/s` (down) and `12 Mb/s` (up)
+```text
+D 48 Mb/s      PING
+U 12 Mb/s       23
+```
 
-Values refresh several times per second while the app is running.
+- Left 75%: live speeds — `D` is download, `U` is upload
+- Right 25%: ping latency in milliseconds, colored by health:
+  - Green / good: 50 ms or less
+  - Yellow / acceptable: 51–100 ms
+  - Red / bad: above 100 ms
+  - Red `OFF`: no response or timeout
+
+Speeds refresh several times per second; the ping refreshes every
+`PING_INTERVAL` seconds (10 by default) and shows `...` until the first reply.
+
+After the first successful display update, the terminal shows:
+
+```text
+Network is working; the result is on the BUSY Bar.
+```
+
+If another app owns the display, the terminal explains how to stop it and
+retries every 10 seconds.
 
 ## Stopping the app
 
@@ -141,6 +177,24 @@ That usually means this computer is not sending or receiving much traffic on
 the selected interface. Open a download or upload and watch again, or pass
 `--interface` with another interface name.
 
+### The ping shows `OFF`
+
+- Try pinging a different target with `--target`.
+- Check whether the target blocks ICMP ping requests.
+- Try your router address to separate local-network problems from internet
+  connectivity problems.
+
+### The app says the display is busy
+
+Stop Social Battery, Screen Saver, or any other BUSY Bar app that is still
+running with `Ctrl+C`, **Back**, or the BUSY Bar mode switch. Network retries
+every 10 seconds until the display becomes available.
+
+### `ping` is not found
+
+Install or enable the operating system's standard `ping` command, then restart
+the app.
+
 ### Python is not found
 
 Install Python 3.10 or newer from
@@ -149,6 +203,5 @@ Install Python 3.10 or newer from
 ## Files included
 
 - `network.py` — the complete app in one Python file
-- `Speed_down-up.png` — UP/DOWN label artwork for the front display
 - `requirements.txt` — Python packages used by the app
 - `Start Here` — double-click starters for macOS and Windows

@@ -339,7 +339,7 @@ automatically clears the display and deletes uploaded temporary assets.
   network and that HTTP API access is enabled in the BUSY Bar web UI.
 
 ### Display is busy
-If another app (e.g. Social Battery or Ping Monitor) is actively holding the
+If another app (e.g. Social Battery or Network) is actively holding the
 display, Screen Saver will notify you and retry every 10 seconds. Press `Ctrl+C`
 or Back on the other app to release the display.
 
