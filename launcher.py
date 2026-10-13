@@ -7,6 +7,7 @@ from a clean, interactive terminal menu.
 
 from __future__ import annotations
 
+import hashlib
 import os
 import subprocess
 import sys
@@ -49,16 +50,46 @@ APPS = [
 ]
 
 
-def find_app_python(app_cwd: Path) -> str:
-    """Find the virtual environment Python if available, otherwise sys.executable."""
+def venv_python(app_cwd: Path) -> Path:
+    """Return the path to the Python interpreter inside the app's virtualenv."""
     if os.name == "nt":
-        venv_py = app_cwd / ".venv" / "Scripts" / "python.exe"
-    else:
-        venv_py = app_cwd / ".venv" / "bin" / "python"
+        return app_cwd / ".venv" / "Scripts" / "python.exe"
+    return app_cwd / ".venv" / "bin" / "python"
 
-    if venv_py.is_file():
-        return str(venv_py)
-    return sys.executable
+
+def prepare_app_env(app_info: dict) -> str | None:
+    """Create the app's virtualenv and install its requirements when needed.
+
+    Returns the interpreter to use, or None if setup failed.
+    """
+    cwd: Path = app_info["cwd"]
+    venv_py = venv_python(cwd)
+    requirements = cwd / "requirements.txt"
+
+    if not venv_py.is_file():
+        print(f"Preparing {app_info['name']} for first use...")
+        result = subprocess.run([sys.executable, "-m", "venv", str(cwd / ".venv")], cwd=str(cwd))
+        if result.returncode != 0 or not venv_py.is_file():
+            print(f"\n[!] Could not create a virtual environment in {cwd / '.venv'}")
+            return None
+
+    if requirements.is_file():
+        # Only reinstall when requirements.txt changes, so launches stay fast.
+        digest = hashlib.sha256(requirements.read_bytes()).hexdigest()
+        stamp = cwd / ".venv" / ".requirements.sha256"
+        if not stamp.is_file() or stamp.read_text().strip() != digest:
+            print(f"Installing dependencies for {app_info['name']}...")
+            result = subprocess.run(
+                [str(venv_py), "-m", "pip", "install", "--quiet", "--disable-pip-version-check",
+                 "-r", str(requirements)],
+                cwd=str(cwd),
+            )
+            if result.returncode != 0:
+                print(f"\n[!] Failed to install dependencies from {requirements}")
+                return None
+            stamp.write_text(digest)
+
+    return str(venv_py)
 
 
 def run_app(app_info: dict) -> None:
@@ -70,7 +101,10 @@ def run_app(app_info: dict) -> None:
         print(f"\n[!] Error: Script not found: {script_path}")
         return
 
-    python_bin = find_app_python(cwd)
+    python_bin = prepare_app_env(app_info)
+    if python_bin is None:
+        return
+
     print("\n" + "=" * 62)
     print(f" Starting {app_info['name']}...")
     print(f" Working Directory: {cwd}")
