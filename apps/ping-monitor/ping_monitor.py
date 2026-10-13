@@ -41,6 +41,48 @@ def load_dotenv() -> None:
             os.environ.setdefault(key, value)
 
 
+def ask_for_new_host(host: str, error: Exception) -> str | None:
+    """Offer to enter a new BUSY Bar IP after a failed connection.
+
+    Returns the new host, or None when the user declines or no terminal is attached.
+    """
+    print(f"Could not connect to BUSY Bar at {host}: {error}")
+    if not sys.stdin.isatty():
+        return None
+    print("\nIf your BUSY Bar has a new IP address (for example after joining a different Wi-Fi),")
+    print("enter it below. Check the bar's network settings or your router's device list.")
+    try:
+        new_host = input("New BUSY Bar IP (press Enter to quit): ").strip()
+    except (EOFError, KeyboardInterrupt):
+        print()
+        return None
+    return new_host or None
+
+
+def save_host(host: str) -> None:
+    """Store BUSYBAR_IP in .env so the new address is used next time."""
+    config_path = Path(__file__).resolve().parent / ".env"
+    lines: list[str] = []
+    if config_path.is_file():
+        lines = config_path.read_text(encoding="utf-8").splitlines()
+    elif config_path.with_name(".env.example").is_file():
+        lines = config_path.with_name(".env.example").read_text(encoding="utf-8").splitlines()
+
+    for i, line in enumerate(lines):
+        if line.strip().split("=", 1)[0].strip() == "BUSYBAR_IP":
+            lines[i] = f"BUSYBAR_IP={host}"
+            break
+    else:
+        lines.append(f"BUSYBAR_IP={host}")
+
+    try:
+        config_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    except OSError as error:
+        print(f"Could not save the new IP to {config_path}: {error}")
+        return
+    print(f"Saved BUSYBAR_IP={host} to {config_path}")
+
+
 class BusyBarClient:
     def __init__(self, host: str, password: str | None = None) -> None:
         clean_host = (
@@ -227,24 +269,31 @@ def main() -> None:
     if args.interval <= 0 or args.timeout <= 0:
         raise SystemExit("--interval and --timeout must be greater than 0")
 
-    bar = BusyBarClient(args.host, args.password)
-    try:
-        version = bar.connect()
-        prepare_access(bar)
-    except PermissionError as error:
-        raise SystemExit(str(error)) from error
-    except requests.HTTPError as error:
-        if error.response is not None and error.response.status_code in (401, 403):
-            raise SystemExit(
-                "The BUSY Bar rejected the Wi-Fi access password. "
-                "Check the HTTP API settings and try again."
-            ) from error
-        raise SystemExit(f"BUSY Bar request failed: {error}") from error
-    except requests.RequestException as error:
-        raise SystemExit(
-            f"Could not connect to BUSY Bar at {args.host}: {error}"
-        ) from error
+    host = args.host
+    while True:
+        bar = BusyBarClient(host, args.password)
+        try:
+            version = bar.connect()
+            prepare_access(bar)
+            break
+        except PermissionError as error:
+            raise SystemExit(str(error)) from error
+        except requests.HTTPError as error:
+            if error.response is not None and error.response.status_code in (401, 403):
+                raise SystemExit(
+                    "The BUSY Bar rejected the Wi-Fi access password. "
+                    "Check the HTTP API settings and try again."
+                ) from error
+            raise SystemExit(f"BUSY Bar request failed: {error}") from error
+        except requests.RequestException as error:
+            new_host = ask_for_new_host(host, error)
+            if new_host is None:
+                raise SystemExit(1) from error
+            host = new_host
+            print()
 
+    if host != args.host:
+        save_host(host)
     print(f"Connected to BUSY Bar at {bar.host} (API {version})")
     print(f"Pinging {args.target} every {args.interval:g} seconds.")
     print("Press Ctrl+C to stop.")
